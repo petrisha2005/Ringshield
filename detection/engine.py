@@ -328,15 +328,30 @@ class FraudDetectionEngine:
             ratio_val = round(ratio, 4)
 
             # Heuristic score calculation
+            if self.passthrough_min_ratio >= 1.0:
+                ratio_component = 0.0
+            else:
+                ratio_component = (
+                    (min(1.0, ratio_val) - self.passthrough_min_ratio)
+                    / (1.0 - self.passthrough_min_ratio)
+                )
+
+            delay_component = max(
+                0.0,
+                (self.passthrough_max_delay_seconds - delay)
+                / self.passthrough_max_delay_seconds,
+            )
+
             score = min(
                 0.90,
                 max(
                     0.65,
                     0.65
-                    + 0.15 * ((min(1.0, ratio_val) - self.passthrough_min_ratio) / (1.0 - self.passthrough_min_ratio))
-                    + 0.10 * max(0.0, (self.passthrough_max_delay_seconds - delay) / self.passthrough_max_delay_seconds),
+                    + 0.15 * ratio_component
+                    + 0.10 * delay_component,
                 ),
             )
+
             severity = "CRITICAL" if score >= 0.80 else "HIGH"
 
             evidence = {
