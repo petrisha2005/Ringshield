@@ -1,0 +1,9 @@
+networkx
+numpy
+pandas
+scikit-learn
+streamlit
+plotly
+python-dotenv
+confluent-kafka
+pytest
